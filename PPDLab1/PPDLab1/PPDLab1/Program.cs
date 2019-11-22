@@ -13,7 +13,7 @@ namespace PPDLab1
             Bank bank = new Bank();
 
             int numAccounts = 10000;
-            int numTransactions = 100000000;
+            int numTransactions = 10000000;
             Random random = new Random();
 
             int numThreads = 16;
@@ -35,14 +35,19 @@ namespace PPDLab1
             }
             s.Start();
 
-            foreach (var thread in threads)
+            // creating a thread for performing a check in between the transactions
+            var threadCheck = new Thread(() => bank.PerformeChecks());
+            threadCheck.Start();
+            threads.Add(threadCheck);
+            foreach (var item in threads)
             {
-                thread.Join();
+                item.Join();
             }
 
             s.Stop();
             Console.WriteLine("Stopwatch Stopped: " + s.ElapsedMilliseconds + " milliseconds");
 
+            /*
             Console.WriteLine("Starting account checks...");
             int balanceFailCounter = 0;
             int logFailCounter = 0;
@@ -57,11 +62,11 @@ namespace PPDLab1
                 string logCheckString = logCheckResult ? "CORRECT" : "FAILED";
 
                 Console.WriteLine("ACCOUNT " + account.AccountId + " BALANCE CHECK: " + balanceCheckString);
-                Console.WriteLine("ACCOUNT " + account.AccountId + "     LOG CHECK: " + logCheckString);
+                //Console.WriteLine("ACCOUNT " + account.AccountId + "     LOG CHECK: " + logCheckString);
             }
 
             Console.WriteLine("BALANCE FAIL COUNT: " + balanceFailCounter);
-            Console.WriteLine("LOG FAIL COUNT: " + logFailCounter);
+            Console.WriteLine("LOG FAIL COUNT: " + logFailCounter);*/
             Console.Read();
 
         }
@@ -81,7 +86,7 @@ namespace PPDLab1
                 Account firstAccount = bank.BankAccounts[firstAccountId];
                 Account secondAccount = bank.BankAccounts[secondAccountId];
 
-                bank.PerformTransactionThreadSafeInefficient(firstAccount, secondAccount, random.Next(1, 200));
+                bank.PerformTransactionBankLock(firstAccount, secondAccount, random.Next(1, 200));
             }
         }
     }
